@@ -149,7 +149,9 @@ public class NodeHelper
 
            for ( String child : children )
            {
-               builder.append( getTreeAsString(zk, path + "/" + child) );
+               // in the case of the root of all the zookeeper tree don't appen a '/'
+               String parentPath = path.equals("/") ? path : path + "/";
+               builder.append( getTreeAsString(zk, parentPath + child) );
            }
         }
 

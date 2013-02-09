@@ -2,7 +2,11 @@ package com.zootil.sample;
 
 import com.zootil.election.ElectionWatcher;
 import com.zootil.election.IElectable;
+import com.zootil.util.NodeHelper;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
 
 import java.io.IOException;
 
@@ -14,10 +18,8 @@ public class SimpleElection implements IElectable
     public static void main(String [] args)
             throws IOException, InterruptedException, KeeperException
     {
-        SimpleElection server = new SimpleElection();
-
         // this is just a simple server that assumes you are running zookeeper locally on the default port
-        ElectionWatcher watcher = new ElectionWatcher("SimpleServer", java.net.InetAddress.getLocalHost().getHostName() + ":2181", server);
+        ElectionWatcher watcher = new ElectionWatcher("SimpleServer", java.net.InetAddress.getLocalHost().getHostName() + ":2181", new SimpleElection());
 
         while (true)
         {
