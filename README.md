@@ -12,10 +12,18 @@ To use the SimpleElection sample class you need to have a Zookeeper instance run
 
 On Mac OsX with Homebrew:
     
-    'brew install zookeeper'
+    brew install zookeeper
 
-Once zookeeper is installed and running just run multiple instances of the jar and try randomly killing them.
+then move the sample config over
 
+    mv /usr/local/etc/zookeeper/zoo_sample.cfg /usr/local/etc/zookeeper/zoo.cfg 
+    
+start Zookeeper (your version might be different)
+    
+    /usr/local/Cellar/zookeeper/3.4.5/bin/zkServer start
+    
+
+Once zookeeper is installed and running just run multiple instances of the jar and try randomly killing them. Also try stop Zookeeper to see what happens.
 
 Example Usage
 ======
