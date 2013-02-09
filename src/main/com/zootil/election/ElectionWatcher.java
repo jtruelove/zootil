@@ -290,7 +290,7 @@ public class ElectionWatcher implements  Watcher
                }
                catch (InterruptedException | KeeperException  e)
                {
-                   System.err.println(String.format("Got an exception while determing order ex: %s", e));
+                   System.out.println(String.format("Got an exception while determing order ex: %s", e));
                    electable.terminatingEventOcurred(e);
                }
                break;
@@ -308,14 +308,14 @@ public class ElectionWatcher implements  Watcher
                    determineOrder();
                }
                catch (InterruptedException | KeeperException | IOException e) {
-                   System.err.println(String.format("Session was expired, got an exception while creating new client and registering ex: %s", e));
+                   System.out.println(String.format("Session was expired, got an exception while creating new client and registering ex: %s", e));
                    // the environment is totally jacked let the election watcher take shutdown steps
                    electable.terminatingEventOcurred(e);
                }
                break;
            case AuthFailed:
                String err = "Athenticating to the ZK cluster failed cannot start up properly";
-               System.err.println(err);
+               System.out.println(err);
                electable.terminatingEventOcurred(new IllegalStateException(err));
            default:
                throw new IllegalStateException(String.format("Got a state type I have no mapping for State: %s", watchedEvent.getState()));

@@ -109,13 +109,14 @@ public class NodeHelper
     private static boolean deletePath( ZooKeeper zk, String path, boolean deleteParentWithChildren )
                 throws KeeperException, InterruptedException
     {
+
         Stat stat = zk.exists( path, false );
         if ( stat != null )
         {
             List<String> children = zk.getChildren(path, false);
             for ( String child : children )
             {
-                deletePath(zk, child, true);
+                deletePath(zk, path + "/" + child, true);
             }
 
             if ( deleteParentWithChildren )
