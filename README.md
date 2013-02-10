@@ -6,7 +6,7 @@ Some utility classes for interacting with the Zookeeper framework. The [Election
 
 ###Installation
 
-To use the SimpleElection sample class you need to have a Zookeeper instance running on your localhost on port 2181. 
+To use the [SimpleElection](https://github.com/jtruelove/zootil/blob/master/src/main/com/zootil/sample/SimpleElection.java) sample class (which the jar points at) you need to have a Zookeeper instance running on your localhost on port 2181. 
 
 On Mac OsX with Homebrew:
     
