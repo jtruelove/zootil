@@ -3,7 +3,7 @@ Zootil
 
 Some utility classes for interacting with the Zookeeper framework
 
-<b>Note:</b> this project uses java 1.8
+<b>Note:</b> this project uses java 1.8 which hasn't been released in a stable version yet
 
 Installation
 ======
