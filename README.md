@@ -1,4 +1,4 @@
-#Zootil
+#zootil
 
 Some utility classes for interacting with the Zookeeper framework. The [ElectionWatcher](https://github.com/jtruelove/zootil/blob/master/src/main/com/zootil/election/ElectionWatcher.java) class implements the basic algorithm defined in the Zookeeper [recipe](http://zookeeper.apache.org/doc/trunk/recipes.html#sc_leaderElection).
 
