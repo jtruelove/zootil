@@ -85,7 +85,8 @@ public class ElectionWatcher implements  Watcher
         this.zooKeeperAddress = zookeeperConnectionString;
         amILeader = false;
 
-        zooKeeperClient = new ZooKeeper(zookeeperConnectionString, 3000, this);
+        System.out.println(String.format("initializing zookeeper client with %s", zookeeperConnectionString));
+        zooKeeperClient = new ZooKeeper(zookeeperConnectionString, 5000, this);
         this.electable = electable;
 
         // do an initial registration and check for leadership
@@ -233,11 +234,11 @@ public class ElectionWatcher implements  Watcher
         NodeHelper.deleteChildrenOfPath( zooKeeperClient, leaderNodeRootPath);
 
         // create a leader node associated to this process that is ephemeral
-        String newLeaderNode = NodeHelper.createFullPath( zooKeeperClient, leaderNodePath, CreateMode.EPHEMERAL);
-        System.out.println(String.format("Registered as leader at node: %s for election node: %s", newLeaderNode, currentNodePath));
+        watchedNode = NodeHelper.createFullPath( zooKeeperClient, leaderNodePath, CreateMode.EPHEMERAL);
+        System.out.println(String.format("Registered as leader at node: %s for election node: %s", watchedNode, currentNodePath));
 
-        // no need to watch you are the leader
-        watchedNode = null;
+        // watch my leader node for action
+        zooKeeperClient.exists(watchedNode, true);
         amILeader = true;
 
         electable.leadershipChanged( amILeader );
@@ -271,28 +272,7 @@ public class ElectionWatcher implements  Watcher
         switch (watchedEvent.getState())
         {
            case SyncConnected:
-               try
-               {
-                   if ( ! firstConnect ) {
-                       // this is a reconnect after disconnect, it isn't related to a watched node
-                       if ( watchedEvent.getType() == Event.EventType.None ) {
-                            determineOrder();
-                       }
-                       // the node we were watching was deleted we are the new leader
-                       else if ( watchedEvent.getType() == Event.EventType.NodeDeleted && watchedEvent.getPath().equals( watchedNode ) ) {
-                           registerAsLeader();
-                           System.out.println(NodeHelper.getTreeAsString(zooKeeperClient, pathPrefix));
-                       }
-                   }
-                   else {
-                       firstConnect = false;
-                   }
-               }
-               catch (InterruptedException | KeeperException  e)
-               {
-                   System.out.println(String.format("Got an exception while determing order ex: %s", e));
-                   electable.terminatingEventOcurred(e);
-               }
+               handleSyncEvent(watchedEvent);
                break;
            case Disconnected:
                if ( amILeader ) {
@@ -319,6 +299,50 @@ public class ElectionWatcher implements  Watcher
                electable.terminatingEventOcurred(new IllegalStateException(err));
            default:
                throw new IllegalStateException(String.format("Got a state type I have no mapping for State: %s", watchedEvent.getState()));
+        }
+    }
+
+    /**
+     * Handle various sync cases
+     *
+     * @param watchedEvent the sync event
+     */
+    private void handleSyncEvent(WatchedEvent watchedEvent)
+    {
+        try
+        {
+            if ( ! firstConnect ) {
+                // this is a reconnect after disconnect, it isn't related to a watched node
+                if ( watchedEvent.getType() == Event.EventType.None ) {
+                     determineOrder();
+                }
+                // the node we were watching was deleted we are the new leader, unless we were the leader and
+                //  someone has removed us
+                else if ( watchedEvent.getType() == Event.EventType.NodeDeleted && watchedEvent.getPath().equals( watchedNode ) ) {
+                    if ( ! amILeader ) {
+                         registerAsLeader();
+                         System.out.println(NodeHelper.getTreeAsString(zooKeeperClient, pathPrefix));
+                    }
+                    else {
+                        System.out.println("My leader node has been deleted need to unregister as leader and re-register with cluster.");
+                        unregisterAsLeader();
+                        // if our ephemeral node is still around whack it
+                        if ( zooKeeperClient.exists(currentNodePath, false ) != null ) {
+                             zooKeeperClient.delete(currentNodePath, -1);
+                        }
+                        registerWithCluster();
+                        determineOrder();
+                    }
+                }
+            }
+            else {
+                firstConnect = false;
+            }
+        }
+        catch (InterruptedException | KeeperException e)
+        {
+            System.out.println(String.format("Got an exception while determing order ex: %s", e));
+            electable.terminatingEventOcurred(e);
         }
     }
 }

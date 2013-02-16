@@ -19,7 +19,7 @@ public class SimpleElection implements IElectable
             throws IOException, InterruptedException, KeeperException
     {
         // this is just a simple server that assumes you are running zookeeper locally on the default port
-        ElectionWatcher watcher = new ElectionWatcher("SimpleServer", java.net.InetAddress.getLocalHost().getHostName() + ":2181", new SimpleElection());
+        ElectionWatcher watcher = new ElectionWatcher("SimpleServer", "0.0.0.0:2181,0.0.0.0:2182,0.0.0.0:2183", new SimpleElection());
 
         while (true)
         {
